@@ -1,0 +1,1500 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>BLEACH PERSONALITY TEST — Тест на персонажа Блич</title>
+<style>
+/* ============================================================
+   ТОКЕНЫ ОФОРМЛЕНИЯ — Dark Mysticism White
+   ============================================================ */
+:root{
+  --void:#050505;
+  --ink:#0e0e0e;
+  --panel:#181818;
+  --line:#252525;
+  --ash:#d9d9d9;
+  --mist:#f5f5f5;
+  --pure:#ffffff;
+  --glow: 0 0 24px rgba(255,255,255,.18), 0 0 60px rgba(255,255,255,.06);
+  --serif: "Kaisei Tokumin","Iowan Old Style","Palatino Linotype",Georgia,serif;
+  --sans: "Avenir Next","Segoe UI",Helvetica,Arial,sans-serif;
+  --mono: "JetBrains Mono","Courier New",monospace;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  background:var(--void);
+  color:var(--ash);
+  font-family:var(--sans);
+  min-height:100vh;
+  overflow-x:hidden;
+  position:relative;
+}
+::selection{background:var(--mist);color:var(--void);}
+::-webkit-scrollbar{width:6px;}
+::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px;}
+
+/* focus visibility for accessibility */
+a:focus-visible, button:focus-visible, [tabindex]:focus-visible{
+  outline:1.5px solid var(--pure);
+  outline-offset:4px;
+}
+
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; scroll-behavior:auto !important;}
+}
+
+/* ============================================================
+   ФОНОВАЯ АТМОСФЕРА — туман, частицы духов, лунный свет
+   ============================================================ */
+#bg-layer{
+  position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden;
+}
+.moon{
+  position:absolute; top:-8%; right:8%;
+  width:340px; height:340px; border-radius:50%;
+  background:radial-gradient(circle at 35% 30%, #ffffff 0%, #eaeaea 30%, #b9b9b9 55%, transparent 72%);
+  filter:blur(2px);
+  box-shadow:0 0 120px 60px rgba(255,255,255,.06), 0 0 260px 120px rgba(255,255,255,.03);
+  animation: moonDrift 40s ease-in-out infinite;
+}
+@keyframes moonDrift{
+  0%,100%{ transform:translate(0,0) scale(1); }
+  50%{ transform:translate(-22px,26px) scale(1.03); }
+}
+.fog{
+  position:absolute; left:-20%; width:140%; height:340px;
+  background:linear-gradient(180deg, transparent, rgba(255,255,255,.05), transparent);
+  filter:blur(18px);
+  animation: fogRoll 34s linear infinite;
+}
+.fog.f1{ top:12%; animation-duration:46s; opacity:.5;}
+.fog.f2{ top:52%; animation-duration:60s; opacity:.35; animation-direction:reverse;}
+.fog.f3{ top:82%; animation-duration:52s; opacity:.4;}
+@keyframes fogRoll{
+  0%{ transform:translateX(-6%); }
+  50%{ transform:translateX(6%); }
+  100%{ transform:translateX(-6%); }
+}
+.spirit{
+  position:absolute;
+  bottom:-10px;
+  width:3px; height:3px;
+  border-radius:50%;
+  background:var(--pure);
+  box-shadow:0 0 8px 2px rgba(255,255,255,.7), 0 0 18px 6px rgba(255,255,255,.25);
+  opacity:0;
+  animation: rise linear infinite;
+}
+@keyframes rise{
+  0%{ opacity:0; transform:translateY(0) translateX(0); }
+  8%{ opacity:.9; }
+  92%{ opacity:.5; }
+  100%{ opacity:0; transform:translateY(-110vh) translateX(var(--drift,40px)); }
+}
+.vignette{
+  position:absolute; inset:0;
+  background:radial-gradient(120% 90% at 50% 20%, transparent 30%, rgba(0,0,0,.55) 100%);
+}
+.grain{
+  position:absolute; inset:0; opacity:.03; mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+
+/* ============================================================
+   ОБЩАЯ РАЗМЕТКА
+   ============================================================ */
+.app{ position:relative; z-index:1; min-height:100vh; }
+.view{ display:none; min-height:100vh; }
+.view.active{ display:block; animation: viewIn .7s cubic-bezier(.2,.8,.2,1); }
+@keyframes viewIn{ from{opacity:0; transform:translateY(14px);} to{opacity:1; transform:translateY(0);} }
+
+.container{ max-width:1080px; margin:0 auto; padding:0 24px; }
+
+.glass{
+  background:linear-gradient(180deg, rgba(24,24,24,.72), rgba(14,14,14,.72));
+  border:1px solid var(--line);
+  backdrop-filter: blur(14px);
+  border-radius:18px;
+}
+
+.eyebrow{
+  font-family:var(--mono); letter-spacing:.35em; text-transform:uppercase;
+  font-size:11px; color:#9a9a9a;
+}
+
+.btn{
+  position:relative;
+  font-family:var(--sans); font-size:15px; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--void); background:var(--mist);
+  border:none; border-radius:999px;
+  padding:16px 42px;
+  cursor:pointer;
+  overflow:hidden;
+  transition: transform .35s ease, box-shadow .35s ease, background .35s ease;
+  box-shadow:0 0 0 rgba(255,255,255,0);
+}
+.btn::before{
+  content:""; position:absolute; inset:0;
+  background:radial-gradient(circle at 50% 50%, rgba(255,255,255,.9), transparent 60%);
+  opacity:0; transition:opacity .4s ease;
+}
+.btn:hover{ transform:translateY(-3px); box-shadow:var(--glow); background:var(--pure); }
+.btn:hover::before{ opacity:.5; }
+.btn:active{ transform:translateY(0px) scale(.98); }
+.btn.ghost{
+  background:transparent; color:var(--mist);
+  border:1px solid var(--line);
+}
+.btn.ghost:hover{ background:rgba(255,255,255,.06); border-color:#3a3a3a; }
+
+/* ============================================================
+   ГЛАВНАЯ СТРАНИЦА
+   ============================================================ */
+.hero{
+  min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  text-align:center; padding:120px 24px 80px;
+  position:relative;
+}
+.hero-kanji{
+  font-family:var(--serif);
+  font-size:13vw; line-height:1;
+  color:transparent;
+  -webkit-text-stroke:1px rgba(255,255,255,.15);
+  letter-spacing:-.02em;
+  position:absolute; top:6%; left:50%; transform:translateX(-50%);
+  user-select:none; pointer-events:none;
+  animation: kanjiPulse 8s ease-in-out infinite;
+}
+@keyframes kanjiPulse{ 0%,100%{ opacity:.5;} 50%{ opacity:.9;} }
+.hero-title{
+  font-family:var(--serif);
+  font-weight:400;
+  font-size:clamp(40px, 8vw, 88px);
+  color:var(--pure);
+  margin:0 0 6px;
+  letter-spacing:.02em;
+  text-shadow:0 0 40px rgba(255,255,255,.18);
+  animation: titleGlow 5s ease-in-out infinite;
+}
+@keyframes titleGlow{
+  0%,100%{ text-shadow:0 0 30px rgba(255,255,255,.14);}
+  50%{ text-shadow:0 0 55px rgba(255,255,255,.3);}
+}
+.hero-sub{
+  font-family:var(--sans); font-weight:300;
+  font-size:clamp(14px,2vw,19px);
+  color:#b7b7b7; max-width:560px; margin:18px auto 46px;
+  line-height:1.7; letter-spacing:.02em;
+}
+.hero-divider{
+  width:1px; height:56px;
+  background:linear-gradient(180deg, transparent, var(--ash), transparent);
+  margin:0 auto 34px;
+  animation: divGrow 2.4s ease-in-out infinite alternate;
+}
+@keyframes divGrow{ from{opacity:.3;} to{opacity:1;} }
+
+.hero-stats{
+  display:flex; gap:46px; margin-top:64px; flex-wrap:wrap; justify-content:center;
+}
+.hero-stat{ text-align:center; }
+.hero-stat b{ display:block; font-family:var(--serif); font-size:30px; color:var(--pure); }
+.hero-stat span{ font-family:var(--mono); font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:#8f8f8f;}
+
+.last-result-card{
+  margin-top:56px; padding:18px 26px;
+  display:inline-flex; align-items:center; gap:16px;
+  border-radius:14px;
+}
+.last-result-card img{ width:44px; height:44px; border-radius:50%; }
+.last-result-card .lr-txt{ text-align:left; font-size:13px; }
+.last-result-card .lr-txt b{ display:block; color:var(--pure); font-family:var(--serif); font-size:16px; }
+
+/* ============================================================
+   СТРАНИЦА ЗАГРУЗКИ
+   ============================================================ */
+.loading-view{ min-height:100vh; display:flex; align-items:center; justify-content:center; text-align:center; }
+.loader-ring{
+  width:96px; height:96px; margin:0 auto 34px;
+  border-radius:50%;
+  border:1px solid var(--line);
+  position:relative;
+}
+.loader-ring::before, .loader-ring::after{
+  content:""; position:absolute; inset:-1px; border-radius:50%;
+  border:1px solid transparent;
+}
+.loader-ring::before{
+  border-top-color:var(--pure); animation:spin 1.6s linear infinite;
+}
+.loader-ring::after{
+  inset:12px; border-bottom-color:rgba(255,255,255,.5); animation:spin 2.4s linear infinite reverse;
+}
+@keyframes spin{ to{ transform:rotate(360deg); } }
+.loader-fact{
+  max-width:460px; margin:0 auto; font-family:var(--serif); font-size:16px; color:var(--mist);
+  min-height:70px; line-height:1.6; font-style:italic;
+  transition:opacity .4s ease;
+}
+.loader-label{ font-family:var(--mono); font-size:11px; letter-spacing:.3em; text-transform:uppercase; color:#7c7c7c; margin-top:22px;}
+
+/* ============================================================
+   СТРАНИЦА ТЕСТА
+   ============================================================ */
+.quiz-view{ padding:60px 0 100px; }
+.quiz-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+.quiz-counter{ font-family:var(--mono); font-size:12px; letter-spacing:.15em; color:#9a9a9a; }
+.quiz-topic{ font-family:var(--mono); font-size:11px; letter-spacing:.25em; text-transform:uppercase; color:#6f6f6f; }
+
+.progress-track{
+  width:100%; height:2px; background:var(--line); border-radius:2px; margin:20px 0 56px; overflow:hidden;
+  position:relative;
+}
+.progress-fill{
+  height:100%; width:0%;
+  background:linear-gradient(90deg, #9a9a9a, var(--pure));
+  box-shadow:0 0 12px rgba(255,255,255,.6);
+  transition:width .6s cubic-bezier(.2,.8,.2,1);
+}
+
+.question-card{
+  padding:52px 48px;
+  text-align:center;
+  position:relative;
+}
+.question-num{
+  font-family:var(--serif); font-size:13px; color:#7c7c7c; letter-spacing:.2em; margin-bottom:18px; display:block;
+}
+.question-text{
+  font-family:var(--serif); font-weight:400;
+  font-size:clamp(22px,3.4vw,32px);
+  color:var(--pure); line-height:1.4; margin:0 0 46px;
+}
+
+.answers-grid{
+  display:grid; grid-template-columns:1fr 1fr; gap:16px;
+}
+.answer-card{
+  text-align:left;
+  padding:22px 24px;
+  border-radius:14px;
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.02);
+  color:var(--ash);
+  font-family:var(--sans); font-size:15px; line-height:1.5;
+  cursor:pointer;
+  transition:transform .3s ease, border-color .3s ease, background .3s ease, box-shadow .3s ease;
+  position:relative;
+  overflow:hidden;
+}
+.answer-card::after{
+  content:""; position:absolute; inset:0; border-radius:14px;
+  box-shadow:inset 0 0 0 1px transparent;
+  transition:box-shadow .3s ease;
+}
+.answer-card:hover{
+  transform:translateY(-4px);
+  border-color:#4a4a4a;
+  background:rgba(255,255,255,.05);
+  box-shadow:0 10px 30px rgba(0,0,0,.4);
+}
+.answer-card.selected{
+  border-color:var(--pure);
+  background:rgba(255,255,255,.09);
+  box-shadow:var(--glow);
+  color:var(--pure);
+}
+.answer-letter{
+  display:inline-flex; align-items:center; justify-content:center;
+  width:26px; height:26px; border-radius:50%;
+  border:1px solid var(--line); font-family:var(--mono); font-size:11px;
+  margin-right:12px; color:#9a9a9a; vertical-align:middle;
+  transition:all .3s ease;
+}
+.answer-card.selected .answer-letter{
+  border-color:var(--pure); color:var(--void); background:var(--pure);
+}
+
+.quiz-nav{ display:flex; justify-content:space-between; align-items:center; margin-top:40px; }
+.quiz-nav .hint{ font-family:var(--mono); font-size:11px; color:#6a6a6a; letter-spacing:.1em; }
+
+@media(max-width:640px){
+  .answers-grid{ grid-template-columns:1fr; }
+  .question-card{ padding:34px 22px; }
+}
+
+/* ============================================================
+   СТРАНИЦА РЕЗУЛЬТАТА
+   ============================================================ */
+.result-view{ padding:70px 0 110px; }
+.result-reveal{
+  text-align:center; margin-bottom:10px;
+}
+.result-eyebrow{ letter-spacing:.4em; }
+
+.portrait-wrap{
+  width:220px; height:220px; margin:34px auto 26px;
+  border-radius:50%;
+  position:relative;
+  animation: portraitIn 1.1s cubic-bezier(.2,.8,.2,1);
+}
+@keyframes portraitIn{
+  from{ opacity:0; transform:scale(.6) rotate(-8deg); }
+  to{ opacity:1; transform:scale(1) rotate(0); }
+}
+.portrait-aura{
+  position:absolute; inset:-22px; border-radius:50%;
+  background:radial-gradient(circle, rgba(255,255,255,.22), transparent 70%);
+  filter:blur(6px);
+  animation: auraPulse 3.4s ease-in-out infinite;
+}
+@keyframes auraPulse{ 0%,100%{ transform:scale(1); opacity:.7;} 50%{ transform:scale(1.12); opacity:1;} }
+.portrait-ring{
+  position:absolute; inset:-8px; border-radius:50%;
+  border:1px solid rgba(255,255,255,.4);
+  animation: ringSpin 14s linear infinite;
+}
+.portrait-ring::before{
+  content:""; position:absolute; top:-2px; left:50%; width:4px; height:4px; border-radius:50%;
+  background:var(--pure); box-shadow:0 0 10px 3px rgba(255,255,255,.8);
+}
+@keyframes ringSpin{ to{ transform:rotate(360deg);} }
+.portrait-img{
+  width:100%; height:100%; border-radius:50%; object-fit:cover;
+  border:1px solid var(--line);
+  position:relative; z-index:1;
+  box-shadow:0 0 50px rgba(255,255,255,.15);
+}
+
+.result-name{
+  font-family:var(--serif); font-size:clamp(34px,5vw,54px); color:var(--pure); margin:8px 0 4px;
+  text-shadow:0 0 40px rgba(255,255,255,.25);
+}
+.result-title-jp{ font-family:var(--mono); font-size:12px; letter-spacing:.3em; color:#8a8a8a; margin-bottom:26px; }
+
+.match-bar-wrap{ max-width:420px; margin:0 auto 8px; }
+.match-label{ display:flex; justify-content:space-between; font-family:var(--mono); font-size:11px; letter-spacing:.15em; color:#9a9a9a; margin-bottom:8px;}
+.match-track{ width:100%; height:6px; border-radius:6px; background:var(--line); overflow:hidden; }
+.match-fill{ height:100%; width:0%; background:linear-gradient(90deg,#9a9a9a,var(--pure)); box-shadow:0 0 14px rgba(255,255,255,.6); transition:width 1.6s cubic-bezier(.2,.8,.2,1); }
+.match-pct{ font-family:var(--serif); font-size:15px; color:var(--pure); }
+
+.result-grid{
+  display:grid; grid-template-columns:1.1fr .9fr; gap:24px;
+  margin-top:56px;
+}
+@media(max-width:820px){ .result-grid{ grid-template-columns:1fr; } }
+
+.rcard{ padding:32px; }
+.rcard h3{
+  font-family:var(--serif); font-weight:400; font-size:19px; color:var(--pure);
+  margin:0 0 16px; letter-spacing:.02em;
+  display:flex; align-items:center; gap:10px;
+}
+.rcard h3::before{ content:""; width:16px; height:1px; background:var(--ash); display:inline-block; }
+.rcard p{ font-size:14.5px; line-height:1.75; color:#c6c6c6; margin:0 0 6px; }
+.quote-block{
+  font-family:var(--serif); font-style:italic; font-size:18px; color:var(--mist);
+  border-left:2px solid var(--line); padding-left:18px; line-height:1.6; margin:0;
+}
+.tag-row{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+.tag-pill{
+  font-family:var(--mono); font-size:10.5px; letter-spacing:.08em; text-transform:uppercase;
+  padding:6px 12px; border:1px solid var(--line); border-radius:999px; color:#a9a9a9;
+}
+.stat-list{ list-style:none; margin:0; padding:0; }
+.stat-list li{
+  display:flex; justify-content:space-between; gap:12px;
+  padding:11px 0; border-bottom:1px solid var(--line);
+  font-size:13.5px;
+}
+.stat-list li:last-child{ border-bottom:none; }
+.stat-list li span:first-child{ font-family:var(--mono); font-size:10.5px; letter-spacing:.15em; text-transform:uppercase; color:#7c7c7c; }
+.stat-list li span:last-child{ color:var(--mist); text-align:right; }
+
+.sw-grid{ display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:6px; }
+.sw-col ul{ margin:0; padding-left:18px; }
+.sw-col li{ font-size:13.5px; line-height:1.6; margin-bottom:6px; color:#c6c6c6; }
+.sw-col h4{ font-family:var(--mono); font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:#9a9a9a; margin:0 0 10px; }
+
+.also-matched{ margin-top:26px; }
+.also-row{ display:flex; align-items:center; gap:12px; padding:9px 0; border-bottom:1px solid var(--line); font-size:13px; }
+.also-row:last-child{ border:none; }
+.also-row img{ width:30px; height:30px; border-radius:50%; }
+.also-row .bar{ flex:1; height:3px; background:var(--line); border-radius:3px; overflow:hidden; }
+.also-row .bar i{ display:block; height:100%; background:var(--ash); }
+.also-row .pct{ font-family:var(--mono); font-size:11px; color:#9a9a9a; width:38px; text-align:right; }
+
+.result-actions{ display:flex; gap:16px; justify-content:center; margin-top:56px; flex-wrap:wrap; }
+
+.toast{
+  position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(20px);
+  background:var(--pure); color:var(--void); padding:14px 26px; border-radius:999px;
+  font-size:13px; letter-spacing:.03em; box-shadow:var(--glow);
+  opacity:0; pointer-events:none; transition:all .4s ease; z-index:50;
+  font-family:var(--sans);
+}
+.toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+/* footer note */
+.foot-note{
+  text-align:center; font-family:var(--mono); font-size:10.5px; letter-spacing:.2em;
+  text-transform:uppercase; color:#5c5c5c; padding:40px 0 20px;
+}
+
+/* skip-link */
+.skip-link{
+  position:absolute; left:-999px; top:0; background:var(--pure); color:var(--void); padding:10px 16px; z-index:100;
+}
+.skip-link:focus{ left:16px; top:16px; }
+</style>
+</head>
+<body>
+
+<a href="#main" class="skip-link">Перейти к содержимому</a>
+
+<!-- ФОНОВАЯ АТМОСФЕРА -->
+<div id="bg-layer" aria-hidden="true">
+  <div class="moon"></div>
+  <div class="fog f1"></div>
+  <div class="fog f2"></div>
+  <div class="fog f3"></div>
+  <div id="spirits"></div>
+  <div class="vignette"></div>
+  <div class="grain"></div>
+</div>
+
+<main class="app" id="main">
+
+  <!-- ============ ГЛАВНАЯ СТРАНИЦА ============ -->
+  <section class="view active" id="view-home">
+    <div class="hero">
+      <div class="hero-kanji" aria-hidden="true">魂</div>
+      <p class="eyebrow">Soul Society · Психологический тест</p>
+      <h1 class="hero-title">BLEACH<br>PERSONALITY TEST</h1>
+      <div class="hero-divider"></div>
+      <p class="hero-sub">Тридцать вопросов о чести, страхе, свободе и долге откроют,
+        чья духовная сила — реяцу — резонирует с вашей собственной.
+        Пройдите путь между Миром Живых и Обществом Душ, чтобы узнать,
+        кто из 25 персонажей вселенной «Блич» является вашим истинным отражением.</p>
+      <button class="btn" id="startBtn">Начать тест</button>
+
+      <div class="hero-stats">
+        <div class="hero-stat"><b>30</b><span>Вопросов</span></div>
+        <div class="hero-stat"><b>25</b><span>Персонажей</span></div>
+        <div class="hero-stat"><b>∞</b><span>Комбинаций реяцу</span></div>
+      </div>
+
+      <div id="lastResultBlock"></div>
+    </div>
+  </section>
+
+  <!-- ============ СТРАНИЦА ЗАГРУЗКИ ============ -->
+  <section class="view" id="view-loading">
+    <div class="container loading-view">
+      <div>
+        <div class="loader-ring" aria-hidden="true"></div>
+        <p class="loader-fact" id="loaderFact">Загрузка духовной энергии...</p>
+        <p class="loader-label" id="loaderLabel">Анализ реяцу — 0%</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ СТРАНИЦА ТЕСТА ============ -->
+  <section class="view" id="view-quiz">
+    <div class="container quiz-view">
+      <div class="quiz-head">
+        <span class="quiz-counter" id="quizCounter">Вопрос 1 / 30</span>
+        <span class="quiz-topic" id="quizTopic">Лидерство</span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+
+      <div class="question-card glass" id="questionCard">
+        <span class="question-num" id="questionNum">Вопрос I</span>
+        <h2 class="question-text" id="questionText">Загрузка вопроса…</h2>
+        <div class="answers-grid" id="answersGrid" role="radiogroup" aria-label="Варианты ответа"></div>
+      </div>
+
+      <div class="quiz-nav">
+        <button class="btn ghost" id="backBtn">← Назад</button>
+        <span class="hint">Выберите ответ, чтобы продолжить · можно с клавиатуры (1–4)</span>
+        <button class="btn ghost" id="skipBtn" style="visibility:hidden">Пропустить</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ СТРАНИЦА РЕЗУЛЬТАТА ============ -->
+  <section class="view" id="view-result">
+    <div class="container result-view">
+      <div class="result-reveal">
+        <p class="eyebrow result-eyebrow">Ваша духовная сила раскрыта</p>
+        <div class="portrait-wrap">
+          <div class="portrait-aura"></div>
+          <div class="portrait-ring"></div>
+          <img class="portrait-img" id="resultPortrait" src="" alt="">
+        </div>
+        <h2 class="result-name" id="resultName">—</h2>
+        <p class="result-title-jp" id="resultAffil">—</p>
+
+        <div class="match-bar-wrap">
+          <div class="match-label"><span>Совместимость</span><span class="match-pct" id="matchPctLabel">0%</span></div>
+          <div class="match-track"><div class="match-fill" id="matchFill"></div></div>
+        </div>
+      </div>
+
+      <div class="result-grid">
+        <div class="rcard glass">
+          <h3>Анализ личности</h3>
+          <p id="resultPersonality">—</p>
+          <h3 style="margin-top:26px;">Почему именно этот персонаж</h3>
+          <p id="resultReason">—</p>
+          <h3 style="margin-top:26px;">Краткая биография</h3>
+          <p id="resultBio">—</p>
+          <div class="sw-grid">
+            <div class="sw-col">
+              <h4>Сильные стороны</h4>
+              <ul id="resultStrengths"></ul>
+            </div>
+            <div class="sw-col">
+              <h4>Слабые стороны</h4>
+              <ul id="resultWeaknesses"></ul>
+            </div>
+          </div>
+          <h3 style="margin-top:26px;">Знаменитая цитата</h3>
+          <p class="quote-block" id="resultQuote">—</p>
+        </div>
+
+        <div>
+          <div class="rcard glass">
+            <h3>Досье</h3>
+            <ul class="stat-list" id="resultStats"></ul>
+          </div>
+          <div class="rcard glass also-matched" style="margin-top:24px;">
+            <h3>Родственные реяцу</h3>
+            <div id="alsoMatched"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="result-actions">
+        <button class="btn" id="retakeBtn">Пройти ещё раз</button>
+        <button class="btn ghost" id="shareBtn">Поделиться результатом</button>
+      </div>
+    </div>
+  </section>
+
+  <p class="foot-note">Soul Society · Реяцу не лжёт · Неофициальный фан-проект</p>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================================================================
+   BLEACH PERSONALITY TEST — логика приложения
+   Всё на чистом JavaScript, без сторонних библиотек.
+   ================================================================ */
+(function(){
+"use strict";
+
+/* ----------------------------------------------------------------
+   0. УТИЛИТЫ ОФОРМЛЕНИЯ АВАТАРОВ
+   Портреты генерируются локально в виде SVG (монохромная
+   духовная печать с инициалом персонажа), чтобы страница
+   гарантированно работала офлайн без внешних зависимостей.
+------------------------------------------------------------------- */
+function makePortrait(name, seed){
+  const initial = name.trim()[0].toUpperCase();
+  // детерминированный псевдослучайный угол/тон на основе seed
+  const hueShift = (seed * 37) % 40;
+  const svg = `
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+    <defs>
+      <radialGradient id="g${seed}" cx="35%" cy="30%" r="75%">
+        <stop offset="0%" stop-color="#3a3a3a"/>
+        <stop offset="55%" stop-color="#161616"/>
+        <stop offset="100%" stop-color="#050505"/>
+      </radialGradient>
+      <filter id="b${seed}"><feGaussianBlur stdDeviation="1.1"/></filter>
+    </defs>
+    <rect width="200" height="200" fill="url(#g${seed})"/>
+    <circle cx="100" cy="100" r="86" fill="none" stroke="#3c3c3c" stroke-width="1"/>
+    <circle cx="100" cy="100" r="70" fill="none" stroke="#2a2a2a" stroke-width="1" stroke-dasharray="2 6"/>
+    <g transform="rotate(${hueShift} 100 100)">
+      <circle cx="100" cy="24" r="2" fill="#e8e8e8"/>
+      <circle cx="176" cy="100" r="2" fill="#e8e8e8"/>
+      <circle cx="100" cy="176" r="2" fill="#e8e8e8"/>
+      <circle cx="24" cy="100" r="2" fill="#e8e8e8"/>
+    </g>
+    <text x="100" y="128" font-family="Georgia, 'Times New Roman', serif" font-size="86"
+      text-anchor="middle" fill="#f2f2f2" filter="url(#b${seed})" opacity="0.92">${initial}</text>
+  </svg>`;
+  return "data:image/svg+xml;utf8," + encodeURIComponent(svg);
+}
+
+/* ----------------------------------------------------------------
+   1. ДАННЫЕ ПЕРСОНАЖЕЙ (25)
+   tags — психологические черты, используемые скрытым алгоритмом
+   подсчёта очков.
+------------------------------------------------------------------- */
+const CHAR = [
+  {id:"ichigo", name:"Ичиго Куросаки", jp:"死神代行",
+   race:"Человек / Сингетсу (Синигами-Квинси-Пустой гибрид)", division:"Заместитель синигами, не состоит в отряде",
+   zanpakuto:"Зангецу", shikai:"Зангецу (изначально в форме банкая)", bankai:"Тенса Зангецу",
+   combat:"Агрессивный ближний бой на грубой, но постоянно растущей духовной силе",
+   tags:["leadership","sacrifice","friendship","strength","justice","hope"],
+   personality:"Ичиго — человек, ведомый не расчётом, а сердцем. Он бросается в бой не потому, что уверен в победе, а потому, что не может смотреть, как страдают близкие. За грубоватой внешностью скрывается почти болезненное чувство ответственности за каждого, кто рядом.",
+   strengths:["Непоколебимая решимость защищать других","Быстрый рост силы под давлением обстоятельств","Способность вести за собой даже без формального статуса"],
+   weaknesses:["Склонность брать всю вину на себя","Импульсивность в критических ситуациях","Трудности с принятием помощи от других"],
+   quote:"Если я не могу защитить их обеими руками — тогда я откажусь от одной из своих рук.",
+   bio:"Обычный старшеклассник, способный видеть духов, случайно получает силы синигами от Рукии Кучики и оказывается втянут в войну между душами, пустыми и Обществом Душ, постепенно становясь одной из ключевых фигур этого конфликта."},
+
+  {id:"rukia", name:"Рукия Кучики", jp:"月",
+   race:"Синигами", division:"13-й отряд, бывший офицер",
+   zanpakuto:"Соде но Сирayuki", shikai:"Соде но Сирayuki — ледяная стихия", bankai:"Хакка но Тогаме",
+   combat:"Элегантный лёд и дистанционный контроль поля боя",
+   tags:["honor","duty","discipline","sacrifice","hope","calm"],
+   personality:"Рукия сдержанна и дисциплинированна, но за холодной внешностью скрывается глубокая теплота и вера в людей. Она умеет жертвовать личным комфортом ради долга, при этом сохраняя внутреннее достоинство.",
+   strengths:["Хладнокровие в критический момент","Твёрдые моральные принципы","Умение вдохновлять других личным примером"],
+   weaknesses:["Излишняя суровость к себе","Скрывает эмоции вместо того, чтобы делиться ими","Иногда жертвует собой без необходимости"],
+   quote:"Не бойся показать свою слабость тем, кто хочет защитить тебя.",
+   bio:"Синигами благородного происхождения, отдавшая свои силы человеку и заплатившая за это заключением, впоследствии становится символом чести и связующим звеном между миром людей и Обществом Душ."},
+
+  {id:"byakuya", name:"Бьякуя Кучики", jp:"誇り",
+   race:"Синигами (аристократия)", division:"6-й отряд, капитан",
+   zanpakuto:"Сенбонзакура", shikai:"Сенбонзакура — тысяча клинков-лепестков", bankai:"Сенбонзакура Кагеёши",
+   combat:"Дистанционные атаки роем клинков с идеальным контролем",
+   tags:["honor","discipline","calm","duty","loyalty","logic"],
+   personality:"Бьякуя — воплощение аристократической дисциплины: каждое его движение подчинено правилам и долгу перед кланом. Внутри этой брони скрывается человек, для которого честь важнее собственной жизни, но который учится ценить и живых людей, а не только традиции.",
+   strengths:["Непревзойдённая выдержка","Стратегическое мышление в бою","Верность принципам, даже когда это дорого стоит"],
+   weaknesses:["Эмоциональная закрытость","Ригидность в следовании правилам","Трудности с прощением собственных ошибок"],
+   quote:"Те, кто не может пожертвовать чем-либо, никогда не смогут ничего изменить.",
+   bio:"Глава благородного дома Кучики и капитан 6-го отряда, чья жизнь построена вокруг клятвы, данной покойной жене — защищать закон и семью любой ценой, пока он не пересматривает, что на самом деле важнее."},
+
+  {id:"kenpachi", name:"Кэнпачи Зараки", jp:"闘志",
+   race:"Синигами", division:"11-й отряд, капитан",
+   zanpakuto:"Нозарашi (истинное имя скрыто до раскрытия)", shikai:"Не проявлен долгое время из-за подавления силы", bankai:"Неизвестен большую часть сюжета",
+   combat:"Дикий, инстинктивный ближний бой на чистой боевой мощи",
+   tags:["aggression","strength","freedom","confidence","risk"],
+   personality:"Кэнпачи живёт ради самого боя — не ради славы или мести, а ради чистого ощущения противостояния равному сопернику. Его прямолинейность обманчива: за жаждой битвы стоит глубокое уважение к силе и честности противника.",
+   strengths:["Абсолютная бесстрашность","Умение находить радость в трудностях","Честность в намерениях, без хитрости"],
+   weaknesses:["Пренебрежение стратегией и тактикой","Не считает нужным сдерживать разрушительность","Скука вне боя, трудности с рутиной"],
+   quote:"Меня не волнует, кто ты. Если ты силён — я буду с тобой сражаться, только это имеет значение.",
+   bio:"Капитан 11-го отряда, поднявшийся с самого дна Руконгая исключительно за счёт грубой силы и жажды сражений, ищущий не власти, а достойных противников, способных заставить его почувствовать себя живым."},
+
+  {id:"aizen", name:"Сосуке Айзен", jp:"欺瞞",
+   race:"Синигами (позже — гибрид с силой хогёку)", division:"5-й отряд, бывший капитан",
+   zanpakuto:"Кёка Суйгецу", shikai:"Полная гипнотическая иллюзия при обнажении клинка", bankai:"Не демонстрируется явно — сила превосходит стандартную классификацию",
+   combat:"Психологическая война и иллюзии, побеждающие до начала боя",
+   tags:["logic","darkness","confidence","freedom","intuition"],
+   personality:"Айзен — воплощение холодного, безграничного интеллекта, не признающего никаких пределов, включая моральные. Он презирает системы, которым сам когда-то служил, и видит себя единственным, кто вправе переписать законы мироздания.",
+   strengths:["Феноменальное стратегическое предвидение","Полный контроль над эмоциями и лицом","Способность превращать слабость в оружие"],
+   weaknesses:["Патологическое высокомерие","Неспособность по-настоящему довериться кому-либо","Презрение к чужим чувствам как к слабости"],
+   quote:"Ты ведь до сих пор не понял? С самого начала моя ёсогивая форма была моей истинной формой.",
+   bio:"Один из самых уважаемых капитанов Готей 13, десятилетиями скрывавший истинные амбиции — превзойти пределы, отделяющие синигами от богов, и полностью переписать иерархию духовного мира."},
+
+  {id:"urahara", name:"Киске Урахара", jp:"知略",
+   race:"Синигами (изгнанник)", division:"Бывший капитан 12-го отряда, ныне владелец лавки",
+   zanpakuto:"Бенихиме", shikai:"Бенихиме — управление кровью и разрезами пространства", bankai:"Санге но Сайго Тачи",
+   combat:"Непредсказуемая тактика, изобретательные технологии и обманные манёвры",
+   tags:["intuition","creativity","logic","calm","freedom"],
+   personality:"Урахара прячет один из самых острых умов Общества Душ за маской ленивого чудака. Он предпочитает действовать на несколько шагов впереди всех, избегая прямой конфронтации там, где можно обойтись хитростью и подготовкой.",
+   strengths:["Исключительная изобретательность","Умение сохранять спокойствие в любом кризисе","Способность видеть общую картину раньше других"],
+   weaknesses:["Чрезмерная скрытность, даже с союзниками","Готовность идти на этичные компромиссы ради результата","Груз вины за прошлые решения"],
+   quote:"Планы хороши лишь настолько, насколько ты готов от них отказаться, когда реальность скажет иначе.",
+   bio:"Бывший капитан, изгнанный из Общества Душ по ложному обвинению, ныне ведёт скромную лавку в Мире Живых, оставаясь одним из самых влиятельных теневых игроков во всех крупных конфликтах."},
+
+  {id:"hitsugaya", name:"Тоширо Хицугая", jp:"氷心",
+   race:"Синигами", division:"10-й отряд, капитан",
+   zanpakuto:"Хёринмару", shikai:"Хёринмару — управление льдом и снегом", bankai:"Дайгурен Хёринмару",
+   combat:"Контроль территории через лёд, стремительные ледяные драконы",
+   tags:["discipline","responsibility","logic","calm","duty"],
+   personality:"Несмотря на юный возраст, Тоширо несёт груз ответственности капитана с почти взрослой серьёзностью. Он требователен к себе больше, чем к кому-либо, и с трудом позволяет себе показывать уязвимость.",
+   strengths:["Аналитический склад ума не по годам","Дисциплина и организованность","Забота о подчинённых, скрытая за строгостью"],
+   weaknesses:["Излишняя требовательность к себе","Раздражительность при недооценке его возраста","Трудности с принятием собственных ограничений"],
+   quote:"Я не собираюсь оправдываться за свой рост. Судите меня по моим поступкам, а не по цифрам.",
+   bio:"Самый молодой капитан в истории Готей 13, взваливший на себя капитанское звание в подростковом возрасте и вынужденный постоянно доказывать, что его назначение — не ошибка."},
+
+  {id:"yamamoto", name:"Генрюсай Ямамото", jp:"炎の掟",
+   race:"Синигами", division:"1-й отряд, Генерал-капитан",
+   zanpakuto:"Рюджин Джакка", shikai:"Постоянно активен — испепеляющее пламя", bankai:"Дзока Тенкен",
+   combat:"Подавляющая огненная мощь и вековой боевой опыт",
+   tags:["discipline","duty","honor","leadership","responsibility"],
+   personality:"Ямамото — живое воплощение закона и порядка Общества Душ, накопивший тысячелетия опыта и убеждённости в необходимости системы правил, даже суровой. Его решения редко подлежат сомнению — не из тщеславия, а из уверенности, что порядок важнее сиюминутных чувств.",
+   strengths:["Непоколебимая приверженность долгу","Многовековая мудрость и предвидение","Способность принимать тяжёлые решения без колебаний"],
+   weaknesses:["Излишняя жёсткость к отступлениям от правил","Недооценка эмоциональных аргументов","Груз старых, неразрешённых сожалений"],
+   quote:"Порядок, поддерживаемый ценой одной жизни, стоит дороже, чем хаос, стоящий тысячи.",
+   bio:"Основатель и бессменный глава Готей 13 на протяжении тысячи лет, чья суровая философия порядка формировала саму структуру Общества Душ."},
+
+  {id:"shunsui", name:"Шунсуй Кёраку", jp:"自由人",
+   race:"Синигами", division:"8-й, затем 1-й отряд, капитан / позже Генерал-капитан",
+   zanpakuto:"Кацутеши Мочизуки", shikai:"Двойные мечи с игровой, обманчивой природой", bankai:"Игровая механика превращает поле боя в 'игру' с фатальными правилами",
+   combat:"Обманчиво расслабленный стиль, скрывающий смертоносную точность",
+   tags:["freedom","calm","creativity","trust","forgiveness"],
+   personality:"Шунсуй демонстративно избегает излишней серьёзности, но за расслабленной маской скрывается глубокая мудрость и умение видеть людей насквозь. Он верит, что доверие и лёгкость иногда сильнее приказов и дисциплины.",
+   strengths:["Способность разрядить любое напряжение","Глубокое понимание человеческой природы","Гибкость мышления в нестандартных ситуациях"],
+   weaknesses:["Скрывает истинные чувства за шутками","Нежелание брать на себя формальную власть","Тяжело переживает потери, не показывая этого"],
+   quote:"Иногда лучший способ защитить кого-то — позволить ему думать, что он тебя не заметил.",
+   bio:"Один из старейших капитанов Готей 13, чья дружба с Дзюширо Укитакэ длится веками, а показная лень скрывает одного из сильнейших и проницательнейших стратегов Общества Душ."},
+
+  {id:"ukitake", name:"Дзюширо Укитакэ", jp:"優しさ",
+   race:"Синигами", division:"13-й отряд, капитан",
+   zanpakuto:"Согьё Котоваши", shikai:"Раздвоенный клинок, стихия молнии и льда", bankai:"Не демонстрируется явно",
+   combat:"Мягкий, но эффективный стиль, приспособленный к его хрупкому здоровью",
+   tags:["forgiveness","calm","hope","loyalty","honor"],
+   personality:"Укитакэ — воплощение доброты и терпения даже перед лицом собственной смертельной болезни. Он редко повышает голос и почти никогда не осуждает подчинённых, предпочитая вести их личным примером сострадания.",
+   strengths:["Безграничное терпение и понимание","Умение прощать даже серьёзные ошибки","Стойкость перед лицом собственной слабости"],
+   weaknesses:["Излишняя мягкость там, где нужна твёрдость","Скрывает своё истинное физическое состояние","Иногда жертвует здоровьем ради долга"],
+   quote:"Сила — это не отсутствие боли, а способность продолжать заботиться о других вопреки ей.",
+   bio:"Тяжело больной капитан 13-го отряда, чья доброта и вера в подчинённых, включая Рукию, сделали его одним из самых уважаемых и любимых офицеров Готей 13."},
+
+  {id:"renji", name:"Рэндзи Абарай", jp:"絆",
+   race:"Синигами", division:"6-й отряд, лейтенант / позже капитан",
+   zanpakuto:"Забимару", shikai:"Забимару — гибкий сегментированный клинок", bankai:"Хихио Забимару",
+   combat:"Мощные размашистые атаки с гибкой досягаемостью клинка",
+   tags:["loyalty","friendship","confidence","strength","risk"],
+   personality:"Рэндзи прошёл путь от уличного мальчишки из Руконгая до одного из сильнейших офицеров Готей 13, и этот путь сделал его преданным до глубины души тем немногим, кого он называет друзьями.",
+   strengths:["Непоколебимая верность близким","Способность постоянно превосходить себя","Прямота и честность в отношениях"],
+   weaknesses:["Комплекс неполноценности рядом с более сильными","Импульсивная гордость","Тенденция недооценивать собственный прогресс"],
+   quote:"Я поклялся, что в следующий раз буду достаточно силён, чтобы защитить тех, кто мне дорог.",
+   bio:"Друг детства Рукии Кучики, поднявшийся из беднейших районов Руконгая до лейтенанта, а затем и капитана, ведомый обещанием никогда больше не быть недостаточно сильным для защиты близких."},
+
+  {id:"ikkaku", name:"Иккаку Мадарамэ", jp:"誇示",
+   race:"Синигами", division:"11-й отряд, третье сиденье",
+   zanpakuto:"Хозукимару", shikai:"Хозукимару — трезубец-нагіната", bankai:"Рюмон Хозукимару",
+   combat:"Агрессивный, зрелищный ближний бой, ищущий равных противников",
+   tags:["confidence","risk","strength","honor","aggression"],
+   personality:"Иккаку одержим идеей никогда не показывать свою истинную силу без крайней необходимости, предпочитая упорный, честный бой лёгкой победе. Гордость для него — не тщеславие, а кодекс чести бойца.",
+   strengths:["Непоколебимая гордость воина","Готовность рисковать жизнью ради принципа","Верность своему капитану и отряду"],
+   weaknesses:["Излишняя бравада, скрывающая осторожность","Отказ от помощи из гордости","Тяга к ненужному риску ради зрелищности"],
+   quote:"Мне плевать, выиграю я или проиграю. Мне важно, дрался ли я в полную силу.",
+   bio:"Третье сиденье 11-го отряда, чья репутация бойца построена на десятках эффектных, но честных схваток, и который скрывает истинную мощь своего занпакуто до тех пор, пока противник не докажет, что достоин её увидеть."},
+
+  {id:"yumichika", name:"Юмичика Аясэгава", jp:"美学",
+   race:"Синигами", division:"11-й отряд, пятое сиденье",
+   zanpakuto:"Фудзи Кудзяку", shikai:"Меняющий облик клинок с ядовитыми и целебными свойствами", bankai:"Не демонстрируется явно",
+   combat:"Изящный, но смертоносный стиль, замаскированный под эстетику",
+   tags:["creativity","confidence","loyalty","aggression"],
+   personality:"Юмичика ценит красоту превыше многого — но не поверхностную, а красоту момента, движения, честного финала. За кажущимся тщеславием скрывается острый ум и глубокая привязанность к друзьям.",
+   strengths:["Тонкое эстетическое и тактическое чутьё","Верность близким друзьям без вопросов","Способность скрывать истинную силу ради принципа"],
+   weaknesses:["Излишняя сосредоточенность на внешних деталях","Скрытность в отношении собственных возможностей","Уязвимое самолюбие"],
+   quote:"Некрасивые вещи не стоят моего внимания — включая нечестную победу.",
+   bio:"Пятое сиденье 11-го отряда, скрывающий истинную природу своего занпакуто, поскольку считает её недостаточно 'красивой', и один из самых близких друзей Иккаку с детства в Руконгае."},
+
+  {id:"orihime", name:"Орихиме Иноуэ", jp:"癒し",
+   race:"Человек", division:"Не состоит в Готей 13, независимая союзница",
+   zanpakuto:"Не занпакуто — духи-феи Сотен Кисун", shikai:"Не применимо", bankai:"Не применимо",
+   combat:"Поддержка, защита и восстановление через шесть фей-хранительниц",
+   tags:["forgiveness","hope","friendship","emotion","sacrifice"],
+   personality:"Орихиме — одна из самых эмоционально открытых героинь, чья сила растёт не из агрессии, а из глубокой заботы о других. Она долго сомневается в собственной полезности, но именно эта чуткость становится её величайшей силой.",
+   strengths:["Глубокая эмпатия и забота о других","Способность к безусловному прощению","Скрытая внутренняя стойкость под мягкостью"],
+   weaknesses:["Заниженная самооценка своих возможностей","Готовность жертвовать собой сверх меры","Избегание конфликтов даже там, где они нужны"],
+   quote:"Я хочу защищать, а не быть защищаемой. Хочу быть сильной ради тех, кого люблю.",
+   bio:"Обычная школьница с редким даром — способностью не просто лечить раны, а отменять само событие повреждения, которая постепенно учится верить в собственную силу и ценность."},
+
+  {id:"ishida", name:"Урю Исида", jp:"誇り高き血",
+   race:"Квинси (человек с духовными способностями)", division:"Не состоит в Готей 13",
+   zanpakuto:"Не применимо — духовный лук", shikai:"Не применимо (Гинто Райдо мечи-кресты)", bankai:"Не применимо",
+   combat:"Дистанционные атаки духовными стрелами с хирургической точностью",
+   tags:["logic","discipline","revenge","honor","responsibility"],
+   personality:"Урю — перфекционист, для которого точность и принципы важнее эмоциональных порывов. Его гордость квинси и память о трагедии семьи формируют строгий моральный кодекс, который он редко нарушает.",
+   strengths:["Хладнокровная точность в бою и в планах","Сильное чувство справедливости","Верность собственным принципам вопреки давлению"],
+   weaknesses:["Излишняя гордость, мешающая просить о помощи","Скрытая обида на прошлое","Трудности с доверием после предательств"],
+   quote:"Я не сражаюсь ради мести. Я сражаюсь, чтобы доказать, что не сдамся снова.",
+   bio:"Последний из известных квинси Каракуры, чья ненависть к синигами со временем превращается в сложный союз с Ичиго, пока он не узнаёт куда более глубокую правду о своём народе."},
+
+  {id:"chad", name:"Ясутора Садо (Чад)", jp:"守護",
+   race:"Человек", division:"Не состоит в Готей 13",
+   zanpakuto:"Не применимо — Бразо Дерэча / Изкьерда дель Диабло", shikai:"Не применимо", bankai:"Не применимо",
+   combat:"Мощный ближний бой через трансформацию рук в духовное оружие",
+   tags:["loyalty","calm","strength","responsibility","trust"],
+   personality:"Чад почти никогда не повышает голос и предпочитает молчаливые поступки громким словам. Его клятва — не поднимать руку ради собственной выгоды — определяет всё его поведение: он сражается только ради других.",
+   strengths:["Невероятная физическая и душевная стойкость","Верность данному однажды слову","Спокойствие в самых опасных ситуациях"],
+   weaknesses:["Излишняя молчаливость, скрывающая переживания","Недооценка собственной значимости","Готовность терпеть боль без жалоб дольше необходимого"],
+   quote:"Я дал себе слово поднимать кулаки только ради других — и я его не нарушу.",
+   bio:"Молчаливый друг детства Ичиго, чья огромная физическая сила скрывает глубокую личную клятву никогда не сражаться ради себя, а лишь ради защиты тех, кого он ценит."},
+
+  {id:"yoruichi", name:"Йоруичи Шихоин", jp:"自在",
+   race:"Синигами (аристократия) / Богиня-кошка", division:"Бывший капитан 2-го отряда и командир Онмицукидо",
+   zanpakuto:"Не демонстрируется — мастер боевых искусств без клинка", shikai:"Не применимо", bankai:"Не применимо",
+   combat:"Молниеносное рукопашное искусство и техника вспышки-шага в совершенстве",
+   tags:["freedom","confidence","intuition","risk","creativity"],
+   personality:"Йоруичи живёт по собственным правилам, отказываясь от титулов и формальностей ради подлинной свободы действий. Игривость — её щит, за которым скрывается один из опаснейших бойцов Общества Душ.",
+   strengths:["Непревзойдённая скорость мышления и реакции","Умение сохранять лёгкость даже в серьёзных ситуациях","Готовность рисковать статусом ради правильного решения"],
+   weaknesses:["Скрытность, затрудняющая доверие других","Пренебрежение формальными правилами","Тенденция брать слишком многое на себя в одиночку"],
+   quote:"Титулы связывают руки. Я предпочитаю оставаться свободной, чтобы действовать, когда это действительно важно.",
+   bio:"Бывшая глава дома Шихоин и командир тайной военной полиции, добровольно отказавшаяся от привилегий ради свободы помогать друзьям и восстанавливать справедливость по-своему."},
+
+  {id:"soifon", name:"Сой Фон", jp:"忠誠",
+   race:"Синигами", division:"2-й отряд, капитан / командир Онмицукидо",
+   zanpakuto:"Сузумэбати", shikai:"Жало с эффектом двойного смертельного укола", bankai:"Дзангецу... нет — Дзинтен Кьококу Сузумэбати",
+   combat:"Мгновенные, точечные удары с летальной эффективностью",
+   tags:["discipline","loyalty","duty","aggression","responsibility"],
+   personality:"Сой Фон превратила преданность в почти религиозный принцип, посвятив жизнь долгу и памяти наставницы. Её суровость — способ справиться с болью потери и доказать собственную состоятельность.",
+   strengths:["Абсолютная преданность делу и людям","Дисциплина и скорость исполнения решений","Готовность нести ответственность за отряд полностью"],
+   weaknesses:["Одержимость прошлым и чувством вины","Трудности с прощением себя и других","Излишняя суровость к подчинённым"],
+   quote:"Я поклялась стать достаточно сильной, чтобы больше никогда не потерять того, кого чту.",
+   bio:"Самый молодой капитан своего времени до появления Тоширо, командующая тайной службой Онмицукидо и одержимая желанием оправдать доверие своей наставницы Йоруичи."},
+
+  {id:"grimmjow", name:"Гриммджоу Джагерджак", jp:"野性",
+   race:"Арранкар (Пустой)", division:"Эспада, номер 6",
+   zanpakuto:"Пантера", shikai:"Пантера — резонанс инстинктов", bankai:"Не применимо (ресуррекцион вместо банкая)",
+   combat:"Дикая скорость и грубая мощь ближнего боя",
+   tags:["aggression","freedom","confidence","risk","revenge"],
+   personality:"Гриммджоу презирает любые ограничения и иерархию, признавая только силу как единственный закон. Его ярость направлена не на разрушение ради разрушения, а на постоянное доказательство собственного превосходства.",
+   strengths:["Абсолютная уверенность в бою","Нежелание сдаваться даже перед превосходящим противником","Честность в намерениях — никогда не скрывает целей"],
+   weaknesses:["Неконтролируемая вспыльчивость","Презрение к субординации даже во вред себе","Одержимость реваншем"],
+   quote:"Мне плевать на планы Айзена. Единственное, что меня волнует — раздавить того, кто сильнее меня.",
+   bio:"Шестой Эспада армии Айзена, чья звериная гордость и презрение к слабости постоянно сталкивают его с Ичиго в поисках реванша и подтверждения собственного превосходства."},
+
+  {id:"ulquiorra", name:"Улькиорра Шиффер", jp:"虚無",
+   race:"Арранкар (Пустой)", division:"Эспада, номер 4",
+   zanpakuto:"Мурсьелаго", shikai:"Не применимо", bankai:"Сегунда Этапа — вторая ресуррекцион-форма",
+   combat:"Холодный, точный и подавляюще мощный стиль без лишних эмоций",
+   tags:["darkness","calm","logic","emotion","intuition"],
+   personality:"Улькиорра убеждён, что лишён сердца и эмоций, и подходит к бою с абсолютной, почти философской отстранённостью. Однако именно его столкновения с Орихиме постепенно обнажают едва уловимые проблески того, что он отрицает в себе.",
+   strengths:["Полный контроль над эмоциями в критической ситуации","Аналитическая точность оценки противника","Непоколебимое спокойствие перед лицом смерти"],
+   weaknesses:["Отрицание собственных чувств вплоть до саморазрушения","Неспособность понять ценность того, что не поддаётся логике","Изоляция от других из принципа"],
+   quote:"Что происходит с сердцем, когда оно исчезает? Что остаётся в пустоте?",
+   bio:"Четвёртый Эспада, считающийся одним из самых близких доверенных лиц Айзена, чья ледяная философия пустоты подвергается сомнению после встречи с Орихиме Иноуэ."},
+
+  {id:"stark", name:"Койот Старк", jp:"孤独",
+   race:"Арранкар (Пустой)", division:"Эспада, номер 1 (Примера)",
+   zanpakuto:"Лос Лобос", shikai:"Не применимо", bankai:"Ресуррекцион — стая волков из духовной энергии",
+   combat:"Дистанционные атаки-волки в паре с Лилинетт, минимализм усилий",
+   tags:["calm","freedom","trust","loyalty","fear"],
+   personality:"Койот Старк — сильнейший из Эспада, но менее всего заинтересованный в демонстрации силы. Долгие века одиночества сделали его апатичным, пока связь с Лилинетт и, позже, уважение к достойному противнику не напомнили ему цену компании.",
+   strengths:["Колоссальная сила без необходимости её показывать","Умение ценить редкие подлинные связи","Спокойное принятие даже собственной смерти"],
+   weaknesses:["Глубокая апатия и нежелание действовать без повода","Страх одиночества, скрываемый под ленью","Недостаток инициативы вне угрозы близким"],
+   quote:"Я устал быть один. Пусть хотя бы в конце рядом будет кто-то настоящий.",
+   bio:"Изначально бесчисленное множество слабых пустых, слившихся из-за невыносимого одиночества в единое мощнейшее существо, ставшее Примера Эспада, но так и не переставшее тосковать по подлинной связи с кем-либо."},
+
+  {id:"nel", name:"Неллиэль Ту Одельшванк", jp:"純真",
+   race:"Арранкар (Пустой)", division:"Бывшая Терсера Эспада (номер 3)",
+   zanpakuto:"Гамузан", shikai:"Не применимо", bankai:"Ресуррекцион во взрослой форме — колоссальная сила когтей",
+   combat:"Взрывная мощь ближнего боя, обычно скрытая под безобидной детской формой",
+   tags:["forgiveness","friendship","trust","hope","loyalty"],
+   personality:"Неллиэль сочетает почти детскую открытость и доброту с истинной силой одной из сильнейших Эспада прошлого. Она не держит зла даже на тех, кто предал её, предпочитая видеть в каждом потенциального друга.",
+   strengths:["Искренняя доброта без потери силы","Способность прощать даже глубокие предательства","Верность друзьям, невзирая на обстоятельства"],
+   weaknesses:["Излишняя доверчивость к чужим намерениям","Долгое подавление собственной истинной силы","Уязвимость перед манипуляциями более циничных существ"],
+   quote:"Даже если мир пытался сломать меня — я всё ещё хочу верить в доброту.",
+   bio:"Бывшая Терсера Эспада, коварно понижена своими же подчинёнными до детской формы и памяти, скитается по Уэко Мундо, пока встреча с Ичиго не пробуждает её истинную силу и личность."},
+
+  {id:"yhwach", name:"Яхве", jp:"始祖",
+   race:"Квинси (Первородный)", division:"Ванденрайх, Император",
+   zanpakuto:"Не применимо — Сила Дер Кёнигсрайх (пророчество и поглощение)", shikai:"Не применимо", bankai:"Не применимо",
+   combat:"Абсолютное предвидение будущего и поглощение чужих сил",
+   tags:["logic","confidence","darkness","leadership","revenge"],
+   personality:"Яхве считает себя единственным законным правителем духовного мира, чьё видение будущего делает сопротивление ему теоретически бессмысленным. Его убеждённость в собственной правоте абсолютна и не допускает сомнений.",
+   strengths:["Непревзойдённое стратегическое предвидение","Способность объединять и вести за собой целую цивилизацию","Абсолютная убеждённость в своей цели"],
+   weaknesses:["Полное отсутствие эмпатии к тем, кто ему не служит","Слепые пятна в собственном непогрешимом плане","Презрение ко всему, что не укладывается в его пророчество"],
+   quote:"Будущее уже написано моими глазами. Вам остаётся лишь сыграть отведённую роль.",
+   bio:"Праотец всех квинси, тысячелетиями готовивший месть Обществу Душ за истребление своего народа и претендующий на абсолютную власть над всем духовным миром."},
+
+  {id:"jugram", name:"Джуграм Хашвальт", jp:"忠義",
+   race:"Квинси", division:"Ванденрайх, Первый Стерн Риттер (A — 'Всё')",
+   zanpakuto:"Не применимо — духовный меч квинси Ишида-класса", shikai:"Не применимо", bankai:"Не применимо",
+   combat:"Универсальная адаптация — овладевает силами противников, которых видел в бою",
+   tags:["loyalty","duty","discipline","honor","trust"],
+   personality:"Джуграм посвятил всю свою бесконечно долгую жизнь службе одному-единственному человеку — Яхве, ставя эту преданность выше собственных желаний и даже здравого смысла. Его дисциплина безупречна, а сомнения он прячет глубоко внутри.",
+   strengths:["Абсолютная преданность выбранной цели","Феноменальная способность к адаптации","Хладнокровие в самых отчаянных ситуациях"],
+   weaknesses:["Полное растворение собственной воли в чужой","Неспособность признать, когда преданность становится саморазрушением","Скрытая горечь непризнанных многовековых жертв"],
+   quote:"Моя жизнь принадлежит ему с самого начала — и это никогда не было бременем, только выбором.",
+   bio:"Ближайший助 и сильнейший подчинённый Яхве, чья многовековая, почти самоотречённая преданность императору квинси служит одновременно источником его силы и его величайшей трагедией."},
+
+  {id:"mayuri", name:"Майюри Куроцучи", jp:"探究",
+   race:"Синигами (модифицированный)", division:"12-й отряд, капитан / глава Института технологий",
+   zanpakuto:"Ашисогi Джидзо", shikai:"Ядовитый распылитель-игла", bankai:"Конджики Ашисогi Джидзо",
+   combat:"Токсины, ловушки и непредсказуемые модификации тела и оружия",
+   tags:["logic","creativity","darkness","risk","confidence"],
+   personality:"Майюри ставит научное любопытство выше морали, этики и даже привязанности к собственным творениям. Для него любая ситуация — в первую очередь эксперимент, а результат важнее любых сантиментов.",
+   strengths:["Непревзойдённая изобретательность и научный гений","Способность находить нестандартные решения под давлением","Полное отсутствие страха перед неизвестным"],
+   weaknesses:["Крайняя аморальность в достижении целей","Презрение к тем, кого считает 'недостаточно интересными'","Неспособность выстраивать искренние привязанности"],
+   quote:"Боль — это просто данные. А данные — это единственное, что имеет значение.",
+   bio:"Капитан 12-го отряда и глава научного института Общества Душ, чей гениальный, но лишённый эмпатии разум сделал его одновременно бесценным союзником и одной из самых пугающих фигур Готей 13."}
+];
+
+CHAR.forEach((c,i)=>{ c.img = makePortrait(c.name, i+1); });
+const CHAR_BY_ID = {}; CHAR.forEach(c=>CHAR_BY_ID[c.id]=c);
+
+/* ----------------------------------------------------------------
+   2. ВОПРОСЫ (30), каждый с 4 ответами и тегами
+------------------------------------------------------------------- */
+const QUESTIONS = [
+ {topic:"Лидерство", q:"Группа, к которой вы принадлежите, осталась без явного лидера в кризисный момент. Что вы делаете?",
+  a:[
+   {t:"Беру инициативу на себя, даже если это не моя роль по статусу", tags:["leadership","confidence"]},
+   {t:"Предлагаю действовать сообща, без единого командира", tags:["freedom","trust"]},
+   {t:"Ищу того, кто объективно компетентнее меня, и поддерживаю его", tags:["logic","loyalty"]},
+   {t:"Действую в одиночку, полагаясь только на себя", tags:["freedom","risk"]}
+  ]},
+ {topic:"Честь", q:"Вы дали слово, но обстоятельства изменились настолько, что его выполнение стало крайне невыгодным. Как вы поступите?",
+  a:[
+   {t:"Сдержу слово несмотря ни на что — это дело чести", tags:["honor","discipline"]},
+   {t:"Открыто объясню ситуацию и попрошу пересмотреть договорённость", tags:["logic","trust"]},
+   {t:"Найду способ выполнить обещание творчески, обойдя препятствие", tags:["creativity","intuition"]},
+   {t:"Поставлю благополучие близких выше формального слова", tags:["friendship","emotion"]}
+  ]},
+ {topic:"Справедливость", q:"Вы стали свидетелем несправедливости, совершённой человеком, обладающим большой властью. Ваша реакция?",
+  a:[
+   {t:"Открыто выступлю против, невзирая на последствия", tags:["justice","risk"]},
+   {t:"Соберу доказательства и буду действовать методично", tags:["logic","discipline"]},
+   {t:"Постараюсь понять мотивы этого человека прежде, чем судить", tags:["forgiveness","intuition"]},
+   {t:"Буду действовать в тени, защищая пострадавших без огласки", tags:["freedom","calm"]}
+  ]},
+ {topic:"Жертва", q:"Чтобы спасти близкого человека, вам нужно отказаться от чего-то очень важного лично для вас. Как вы решаете?",
+  a:[
+   {t:"Не раздумывая, жертвую этим ради спасения", tags:["sacrifice","friendship"]},
+   {t:"Сначала ищу альтернативный путь, который не требует жертвы", tags:["logic","creativity"]},
+   {t:"Жертвую, но потом долго переживаю эту потерю внутри", tags:["emotion","responsibility"]},
+   {t:"Спрашиваю у самого человека, хочет ли он такой цены за своё спасение", tags:["trust","honor"]}
+  ]},
+ {topic:"Дружба", q:"Друг совершил серьёзную ошибку, которая навредила другим людям. Что вы делаете?",
+  a:[
+   {t:"Поддерживаю его несмотря ни на что — дружба важнее ошибок", tags:["loyalty","friendship"]},
+   {t:"Честно указываю на ошибку, даже если это ранит его", tags:["honor","justice"]},
+   {t:"Помогаю ему исправить последствия молча, без осуждения", tags:["forgiveness","calm"]},
+   {t:"Дистанцируюсь, пока не разберусь в своих чувствах по этому поводу", tags:["logic","discipline"]}
+  ]},
+ {topic:"Верность", q:"Организация, которой вы служите много лет, просит вас сделать что-то, противоречащее вашим личным убеждениям. Ваш выбор?",
+  a:[
+   {t:"Выполняю приказ — верность системе для меня важнее личных сомнений", tags:["duty","discipline"]},
+   {t:"Отказываюсь и готов принять любые последствия своего решения", tags:["honor","risk"]},
+   {t:"Ищу компромисс, который сохранит и верность, и принципы", tags:["logic","trust"]},
+   {t:"Ставлю верность конкретным людям выше верности организации", tags:["loyalty","friendship"]}
+  ]},
+ {topic:"Страх", q:"Что пугает вас больше всего?",
+  a:[
+   {t:"Оказаться недостаточно сильным, чтобы защитить тех, кто мне дорог", tags:["fear","sacrifice"]},
+   {t:"Остаться совершенно одному, без единой настоящей связи", tags:["fear","trust"]},
+   {t:"Потерять контроль над собой или ситуацией", tags:["discipline","logic"]},
+   {t:"Оказаться неправым в том, во что я искренне верил", tags:["honor","confidence"]}
+  ]},
+ {topic:"Внутренняя сила", q:"Как вы находите силы продолжать, когда всё кажется безнадёжным?",
+  a:[
+   {t:"Вспоминаю тех, кого я обязан защитить", tags:["hope","sacrifice"]},
+   {t:"Опираюсь на дисциплину и привычные ритуалы", tags:["discipline","calm"]},
+   {t:"Ищу гнев или азарт — они дают энергию действовать", tags:["aggression","confidence"]},
+   {t:"Полагаюсь на холодный расчёт: паника ничего не решает", tags:["logic","calm"]}
+  ]},
+ {topic:"Спокойствие", q:"В разгар конфликта вы замечаете, что теряете самообладание. Что вы делаете?",
+  a:[
+   {t:"Делаю паузу и возвращаю контроль через дисциплину", tags:["discipline","calm"]},
+   {t:"Позволяю эмоциям выйти наружу — подавлять их вредно", tags:["emotion","aggression"]},
+   {t:"Перевожу энергию в решительное действие", tags:["confidence","risk"]},
+   {t:"Отступаю, чтобы не навредить никому в состоянии аффекта", tags:["responsibility","forgiveness"]}
+  ]},
+ {topic:"Агрессия", q:"Как вы относитесь к прямой конфронтации?",
+  a:[
+   {t:"Она мне нравится — в честном столкновении есть своя чистота", tags:["aggression","confidence"]},
+   {t:"Стараюсь избегать её, предпочитая переговоры", tags:["calm","trust"]},
+   {t:"Использую её только как последнее средство", tags:["discipline","responsibility"]},
+   {t:"Превращаю её в игру, где важнее не победить, а перехитрить", tags:["creativity","freedom"]}
+  ]},
+ {topic:"Ответственность", q:"Что-то пошло не так по вине всей команды, но обвиняют именно вас. Ваша реакция?",
+  a:[
+   {t:"Беру вину полностью на себя, чтобы защитить остальных", tags:["responsibility","sacrifice"]},
+   {t:"Честно объясняю реальное распределение ответственности", tags:["justice","logic"]},
+   {t:"Не переживаю по этому поводу — результат важнее того, кто виноват", tags:["calm","freedom"]},
+   {t:"Использую ситуацию, чтобы стать сильнее и не повторить ошибку", tags:["discipline","confidence"]}
+  ]},
+ {topic:"Логика", q:"Перед важным решением вы в первую очередь опираетесь на:",
+  a:[
+   {t:"Холодный расчёт и анализ всех возможных сценариев", tags:["logic","discipline"]},
+   {t:"Интуицию и внутреннее чувство правильности", tags:["intuition","emotion"]},
+   {t:"Мнение и благополучие тех, кто мне дорог", tags:["friendship","loyalty"]},
+   {t:"Собственные принципы, даже если они противоречат логике", tags:["honor","confidence"]}
+  ]},
+ {topic:"Эмоции", q:"Как вы обычно справляетесь с сильными переживаниями?",
+  a:[
+   {t:"Проговариваю их с близкими людьми", tags:["friendship","trust"]},
+   {t:"Скрываю их за спокойным, ровным поведением", tags:["calm","discipline"]},
+   {t:"Направляю их в действие или творчество", tags:["creativity","aggression"]},
+   {t:"Позволяю себе прожить их полностью, не сдерживаясь", tags:["emotion","hope"]}
+  ]},
+ {topic:"Интуиция", q:"Вы чувствуете, что что-то не так, хотя логических подтверждений нет. Что вы делаете?",
+  a:[
+   {t:"Доверяю чутью и действую соответственно", tags:["intuition","risk"]},
+   {t:"Ищу рациональные доказательства прежде, чем действовать", tags:["logic","discipline"]},
+   {t:"Делюсь опасением с теми, кому доверяю", tags:["trust","friendship"]},
+   {t:"Наблюдаю молча, готовясь к любому развитию событий", tags:["calm","intuition"]}
+  ]},
+ {topic:"Творчество", q:"Столкнувшись с нестандартной проблемой, вы скорее:",
+  a:[
+   {t:"Придумываю нестандартное, неожиданное решение", tags:["creativity","freedom"]},
+   {t:"Использую проверенный, надёжный метод", tags:["discipline","logic"]},
+   {t:"Спрашиваю совета у тех, кто сталкивался с похожим", tags:["trust","loyalty"]},
+   {t:"Иду напролом, полагаясь на силу и решимость", tags:["aggression","confidence"]}
+  ]},
+ {topic:"Уверенность", q:"Как вы реагируете, когда кто-то сомневается в ваших способностях?",
+  a:[
+   {t:"Доказываю делом, что они ошибаются", tags:["confidence","risk"]},
+   {t:"Мне всё равно на чужое мнение обо мне", tags:["freedom","calm"]},
+   {t:"Задумываюсь — может, в этом есть доля правды", tags:["logic","responsibility"]},
+   {t:"Расстраиваюсь, но стараюсь не показывать этого", tags:["emotion","discipline"]}
+  ]},
+ {topic:"Свобода", q:"Что для вас важнее?",
+  a:[
+   {t:"Полная свобода действовать по-своему, без ограничений", tags:["freedom","confidence"]},
+   {t:"Принадлежность к системе, которая даёт структуру и смысл", tags:["duty","discipline"]},
+   {t:"Свобода в рамках доверительных отношений с близкими", tags:["trust","friendship"]},
+   {t:"Свобода от собственных страхов и ограничений больше, чем от внешних", tags:["hope","emotion"]}
+  ]},
+ {topic:"Долг", q:"Как вы понимаете слово 'долг'?",
+  a:[
+   {t:"Обязательство перед системой или организацией, которой я служу", tags:["duty","discipline"]},
+   {t:"Личное обещание, данное конкретным людям", tags:["loyalty","honor"]},
+   {t:"Внутреннее чувство того, что правильно, независимо от внешних требований", tags:["justice","confidence"]},
+   {t:"Нечто, что можно пересмотреть, если оно вредит близким", tags:["friendship","emotion"]}
+  ]},
+ {topic:"Месть", q:"Кто-то серьёзно навредил вам или вашим близким. Как вы поступите?",
+  a:[
+   {t:"Буду методично готовиться к справедливому ответу", tags:["revenge","discipline"]},
+   {t:"Постараюсь простить, чтобы не тащить это бремя дальше", tags:["forgiveness","calm"]},
+   {t:"Отвечу немедленно и без колебаний", tags:["aggression","risk"]},
+   {t:"Сосредоточусь на защите близких, а не на возмездии", tags:["sacrifice","responsibility"]}
+  ]},
+ {topic:"Прощение", q:"Возможно ли простить того, кто предал вас однажды?",
+  a:[
+   {t:"Да, если он искренне осознал последствия своих поступков", tags:["forgiveness","trust"]},
+   {t:"Нет, доверие, разрушенное однажды, не восстанавливается", tags:["honor","discipline"]},
+   {t:"Смотря какой ценой это предательство обошлось другим", tags:["justice","logic"]},
+   {t:"Прощу, но всё равно останусь настороже", tags:["calm","responsibility"]}
+  ]},
+ {topic:"Надежда", q:"Ситуация выглядит безнадёжной по всем объективным признакам. Ваша позиция?",
+  a:[
+   {t:"Надежда — это то, что нельзя терять, даже когда логика против неё", tags:["hope","emotion"]},
+   {t:"Принимаю реальность такой, какая она есть, без иллюзий", tags:["logic","calm"]},
+   {t:"Ищу малейший шанс и действую на его основе", tags:["risk","confidence"]},
+   {t:"Полагаюсь на тех, кто рядом — вместе легче не терять веру", tags:["friendship","trust"]}
+  ]},
+ {topic:"Тьма", q:"Как вы относитесь к собственной тёмной, разрушительной стороне?",
+  a:[
+   {t:"Признаю её существование и стараюсь держать под контролем", tags:["discipline","logic"]},
+   {t:"Считаю, что она — часть подлинной силы, которую не нужно подавлять", tags:["darkness","confidence"]},
+   {t:"Боюсь её и стараюсь избегать ситуаций, где она проявляется", tags:["fear","calm"]},
+   {t:"Направляю её исключительно на защиту близких", tags:["sacrifice","aggression"]}
+  ]},
+ {topic:"Доверие", q:"Как быстро вы доверяете новым людям?",
+  a:[
+   {t:"Медленно — доверие нужно заслужить поступками", tags:["discipline","honor"]},
+   {t:"Довольно быстро — я предпочитаю верить в лучшее в людях", tags:["trust","forgiveness"]},
+   {t:"Зависит от логического анализа их мотивов", tags:["logic","calm"]},
+   {t:"Почти никогда полностью — полагаюсь в основном на себя", tags:["freedom","fear"]}
+  ]},
+ {topic:"Риск", q:"Перед вами шанс, который может принести огромную пользу, но с высоким риском провала. Что вы делаете?",
+  a:[
+   {t:"Иду на риск без колебаний — награда того стоит", tags:["risk","confidence"]},
+   {t:"Тщательно просчитываю все варианты перед решением", tags:["logic","discipline"]},
+   {t:"Соглашаюсь, только если риск угрожает лишь мне самому", tags:["sacrifice","responsibility"]},
+   {t:"Отказываюсь — стабильность важнее потенциальной выгоды", tags:["calm","duty"]}
+  ]},
+ {topic:"Дисциплина", q:"Как вы относитесь к строгим правилам и распорядку?",
+  a:[
+   {t:"Ценю их — порядок создаёт настоящую свободу действий", tags:["discipline","duty"]},
+   {t:"Соблюдаю их, но готов нарушить ради важной цели", tags:["freedom","justice"]},
+   {t:"Предпочитаю собственные внутренние принципы формальным правилам", tags:["honor","confidence"]},
+   {t:"Правила важны, только если они служат защите людей", tags:["responsibility","friendship"]}
+  ]},
+ {topic:"Лидерство", q:"Какой тип власти вам ближе?",
+  a:[
+   {t:"Власть, заслуженная через уважение и личный пример", tags:["leadership","honor"]},
+   {t:"Власть, основанная на превосходящей силе", tags:["aggression","confidence"]},
+   {t:"Власть, полученная через ум и стратегию", tags:["logic","intuition"]},
+   {t:"Я не стремлюсь к власти вовсе, предпочитая независимость", tags:["freedom","calm"]}
+  ]},
+ {topic:"Одиночество", q:"Как вы переносите долгие периоды одиночества?",
+  a:[
+   {t:"Спокойно — одиночество помогает мне сосредоточиться", tags:["calm","discipline"]},
+   {t:"Тяжело — я по-настоящему нуждаюсь в близких связях", tags:["fear","friendship"]},
+   {t:"Использую его для творчества и саморазвития", tags:["creativity","freedom"]},
+   {t:"Переношу нормально, но втайне скучаю по конкретным людям", tags:["loyalty","emotion"]}
+  ]},
+ {topic:"Совершенство", q:"Как вы относитесь к собственным ошибкам и несовершенству?",
+  a:[
+   {t:"Отношусь к ним крайне строго — стремлюсь к совершенству во всём", tags:["discipline","logic"]},
+   {t:"Принимаю их как часть роста и обучения", tags:["hope","forgiveness"]},
+   {t:"Использую их как повод стать сильнее в следующий раз", tags:["confidence","risk"]},
+   {t:"Ошибки других людей волнуют меня больше, чем мои собственные", tags:["responsibility","justice"]}
+  ]},
+ {topic:"Наследие", q:"Каким вы хотите, чтобы вас запомнили?",
+  a:[
+   {t:"Тем, кто защищал других любой ценой", tags:["sacrifice","friendship"]},
+   {t:"Тем, кто всегда поступал честно, невзирая на обстоятельства", tags:["honor","justice"]},
+   {t:"Тем, кто изменил систему изнутри своим умом", tags:["logic","leadership"]},
+   {t:"Тем, кто жил абсолютно свободно и по-своему", tags:["freedom","confidence"]}
+  ]},
+ {topic:"Истинная природа", q:"Если бы пришлось выбрать одно слово, определяющее вашу истинную суть, это было бы:",
+  a:[
+   {t:"Решимость", tags:["confidence","leadership"]},
+   {t:"Сострадание", tags:["forgiveness","emotion"]},
+   {t:"Дисциплина", tags:["discipline","duty"]},
+   {t:"Свобода", tags:["freedom","intuition"]}
+  ]}
+];
+
+/* ----------------------------------------------------------------
+   3. ФАКТЫ ДЛЯ ЭКРАНА ЗАГРУЗКИ
+------------------------------------------------------------------- */
+const FACTS = [
+ "Слово «Бличь» (Bleach) не имеет прямого перевода в сюжете — Кубо Тайто выбрал его исключительно за звучание и ассоциацию с чистотой.",
+ "Занпакутo — это не просто оружие, а материализованная часть души синигами, обладающая собственным сознанием.",
+ "Общество Душ визуально вдохновлено архитектурой средневековой Японии эпохи Эдо.",
+ "Банкай — высшая форма занпакутo, на освоение которой обычно уходят десятилетия тренировок.",
+ "Реяцу — духовная энергия, уникальная для каждого существа, как отпечаток пальца.",
+ "Готей 13 — тринадцать отрядов синигами, защищающих баланс между мирами живых и мёртвых.",
+ "Квинси — люди с врождённой способностью управлять духовной энергией, исторические противники синигами.",
+ "Руконгай — обширный район Общества Душ за пределами Сейрейтея, где обитает большинство обычных душ.",
+ "Пустые (Холлоу) — заблудшие души, чьи сердца поглотила тьма, ищущие облегчения боли через разрушение.",
+ "Хогёку — артефакт, стирающий границы между синигами, людьми и пустыми."
+];
+
+/* ----------------------------------------------------------------
+   4. СОСТОЯНИЕ ПРИЛОЖЕНИЯ
+------------------------------------------------------------------- */
+const state = {
+  current: 0,
+  answers: new Array(QUESTIONS.length).fill(null), // индексы выбранных ответов
+  scores: {}
+};
+
+CHAR.forEach(c => state.scores[c.id] = 0);
+
+/* ----------------------------------------------------------------
+   5. ФОНОВЫЕ ЧАСТИЦЫ ДУХОВ
+------------------------------------------------------------------- */
+function spawnSpirits(){
+  const wrap = document.getElementById('spirits');
+  const count = window.innerWidth < 640 ? 16 : 30;
+  for(let i=0;i<count;i++){
+    const s = document.createElement('div');
+    s.className = 'spirit';
+    const left = Math.random()*100;
+    const dur = 14 + Math.random()*18;
+    const delay = Math.random()*20;
+    const drift = (Math.random()*80 - 40).toFixed(0) + 'px';
+    s.style.left = left + 'vw';
+    s.style.setProperty('--drift', drift);
+    s.style.animationDuration = dur + 's';
+    s.style.animationDelay = '-' + delay + 's';
+    const size = (2 + Math.random()*2.5).toFixed(1);
+    s.style.width = size + 'px';
+    s.style.height = size + 'px';
+    wrap.appendChild(s);
+  }
+}
+spawnSpirits();
+
+/* ----------------------------------------------------------------
+   6. НАВИГАЦИЯ МЕЖДУ ЭКРАНАМИ
+------------------------------------------------------------------- */
+function showView(id){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+/* ----------------------------------------------------------------
+   7. ГЛАВНАЯ СТРАНИЦА — последний результат из LocalStorage
+------------------------------------------------------------------- */
+function renderLastResult(){
+  const raw = localStorage.getItem('bleachTestLastResult');
+  const block = document.getElementById('lastResultBlock');
+  if(!raw){ block.innerHTML=''; return; }
+  try{
+    const data = JSON.parse(raw);
+    const c = CHAR_BY_ID[data.id];
+    if(!c) return;
+    block.innerHTML = `
+      <div class="last-result-card glass">
+        <img src="${c.img}" alt="${c.name}">
+        <div class="lr-txt">
+          <span>Ваш прошлый результат</span>
+          <b>${c.name} · ${data.pct}%</b>
+        </div>
+      </div>`;
+  }catch(e){}
+}
+renderLastResult();
+
+/* ----------------------------------------------------------------
+   8. ЗАПУСК ТЕСТА / ЭКРАН ЗАГРУЗКИ
+------------------------------------------------------------------- */
+document.getElementById('startBtn').addEventListener('click', ()=>{
+  state.current = 0;
+  state.answers.fill(null);
+  CHAR.forEach(c => state.scores[c.id] = 0);
+  runLoadingSequence();
+});
+
+function runLoadingSequence(){
+  showView('view-loading');
+  const factEl = document.getElementById('loaderFact');
+  const labelEl = document.getElementById('loaderLabel');
+  let pct = 0;
+  let factIdx = Math.floor(Math.random()*FACTS.length);
+  factEl.style.opacity = 1;
+  factEl.textContent = FACTS[factIdx];
+
+  const factTimer = setInterval(()=>{
+    factEl.style.opacity = 0;
+    setTimeout(()=>{
+      factIdx = (factIdx+1) % FACTS.length;
+      factEl.textContent = FACTS[factIdx];
+      factEl.style.opacity = 1;
+    }, 380);
+  }, 1000);
+
+  const progTimer = setInterval(()=>{
+    pct += 4 + Math.random()*8;
+    if(pct >= 100){
+      pct = 100;
+      labelEl.textContent = 'Анализ реяцу — 100%';
+      clearInterval(progTimer);
+      clearInterval(factTimer);
+      setTimeout(()=>{
+        renderQuestion();
+        showView('view-quiz');
+      }, 320);
+      return;
+    }
+    labelEl.textContent = 'Анализ реяцу — ' + Math.floor(pct) + '%';
+  }, 180);
+}
+
+/* ----------------------------------------------------------------
+   9. ЛОГИКА ТЕСТА
+------------------------------------------------------------------- */
+const letters = ['A','B','C','D'];
+
+function renderQuestion(){
+  const idx = state.current;
+  const item = QUESTIONS[idx];
+
+  document.getElementById('quizCounter').textContent = `Вопрос ${idx+1} / ${QUESTIONS.length}`;
+  document.getElementById('quizTopic').textContent = item.topic;
+  document.getElementById('questionNum').textContent = 'Вопрос ' + toRoman(idx+1);
+  document.getElementById('questionText').textContent = item.q;
+
+  const pct = (idx / QUESTIONS.length) * 100;
+  document.getElementById('progressFill').style.width = pct + '%';
+
+  const grid = document.getElementById('answersGrid');
+  grid.innerHTML = '';
+  item.a.forEach((ans, i)=>{
+    const card = document.createElement('button');
+    card.type = 'button';
+    card.className = 'answer-card';
+    card.setAttribute('role','radio');
+    card.setAttribute('aria-checked', state.answers[idx]===i ? 'true' : 'false');
+    if(state.answers[idx] === i) card.classList.add('selected');
+    card.innerHTML = `<span class="answer-letter">${letters[i]}</span>${ans.t}`;
+    card.addEventListener('click', ()=> selectAnswer(i));
+    grid.appendChild(card);
+  });
+
+  const questionCard = document.getElementById('questionCard');
+  questionCard.style.animation = 'none';
+  void questionCard.offsetWidth;
+  questionCard.style.animation = 'viewIn .5s cubic-bezier(.2,.8,.2,1)';
+
+  document.getElementById('backBtn').style.visibility = idx===0 ? 'hidden' : 'visible';
+}
+
+function toRoman(num){
+  const romans = ['I','II','III','IV','V','VI','VII','VIII','IX','X'];
+  if(num<=10) return romans[num-1];
+  return String(num);
+}
+
+function selectAnswer(i){
+  const idx = state.current;
+  state.answers[idx] = i;
+  document.querySelectorAll('.answer-card').forEach((el,ei)=>{
+    el.classList.toggle('selected', ei===i);
+    el.setAttribute('aria-checked', ei===i ? 'true':'false');
+  });
+  setTimeout(()=>{
+    if(idx < QUESTIONS.length - 1){
+      state.current++;
+      renderQuestion();
+    } else {
+      finishQuiz();
+    }
+  }, 380);
+}
+
+document.getElementById('backBtn').addEventListener('click', ()=>{
+  if(state.current > 0){
+    state.current--;
+    renderQuestion();
+  }
+});
+
+/* клавиатурная навигация: 1-4 выбирают ответ */
+document.addEventListener('keydown', (e)=>{
+  if(!document.getElementById('view-quiz').classList.contains('active')) return;
+  if(['1','2','3','4'].includes(e.key)){
+    const i = parseInt(e.key,10)-1;
+    const item = QUESTIONS[state.current];
+    if(item.a[i]) selectAnswer(i);
+  }
+  if(e.key === 'Backspace'){
+    if(state.current>0){ state.current--; renderQuestion(); }
+  }
+});
+
+/* ----------------------------------------------------------------
+   10. ПОДСЧЁТ ОЧКОВ И ФИНАЛ
+------------------------------------------------------------------- */
+function finishQuiz(){
+  CHAR.forEach(c => state.scores[c.id] = 0);
+
+  state.answers.forEach((ansIdx, qIdx)=>{
+    if(ansIdx === null) return;
+    const chosenTags = QUESTIONS[qIdx].a[ansIdx].tags;
+    CHAR.forEach(c=>{
+      let overlap = 0;
+      chosenTags.forEach(t=>{ if(c.tags.includes(t)) overlap++; });
+      if(overlap>0){
+        state.scores[c.id] += overlap * 10;
+      }
+    });
+  });
+
+  // небольшой детерминированный тай-брейкер, чтобы избежать ничьих
+  CHAR.forEach((c,i)=>{ state.scores[c.id] += (i % 7) * 0.31; });
+
+  const ranking = CHAR.slice().sort((a,b)=> state.scores[b.id]-state.scores[a.id]);
+  const winner = ranking[0];
+  const maxPossible = QUESTIONS.length * 2 * 10; // максимум очков теоретически
+  let pct = Math.round((state.scores[winner.id] / maxPossible) * 100);
+  pct = Math.max(62, Math.min(99, pct + 38)); // нормализация в приятный диапазон 62–99%
+
+  renderResult(winner, ranking, pct);
+
+  localStorage.setItem('bleachTestLastResult', JSON.stringify({id:winner.id, pct: pct, date: new Date().toISOString()}));
+  const bestSoFar = parseInt(localStorage.getItem('bleachTestHighestPct') || '0', 10);
+  if(pct > bestSoFar){
+    localStorage.setItem('bleachTestHighestPct', String(pct));
+  }
+
+  showView('view-result');
+}
+
+function renderResult(winner, ranking, pct){
+  document.getElementById('resultPortrait').src = winner.img;
+  document.getElementById('resultPortrait').alt = 'Портрет: ' + winner.name;
+  document.getElementById('resultName').textContent = winner.name;
+  document.getElementById('resultAffil').textContent = winner.jp + ' · ' + winner.division;
+  document.getElementById('resultPersonality').textContent = winner.personality;
+  document.getElementById('resultBio').textContent = winner.bio;
+  document.getElementById('resultQuote').textContent = '«' + winner.quote + '»';
+
+  const reasonTags = winner.tags.map(t=>TAG_RU[t]||t).slice(0,4).join(', ');
+  document.getElementById('resultReason').textContent =
+    `Ваши ответы раскрыли выраженную склонность к таким качествам, как ${reasonTags}. Именно эта комбинация черт резонирует с духовной сущностью персонажа ${winner.name} сильнее, чем с любой другой реяцу во вселенной «Блич».`;
+
+  const strEl = document.getElementById('resultStrengths');
+  strEl.innerHTML = winner.strengths.map(s=>`<li>${s}</li>`).join('');
+  const weakEl = document.getElementById('resultWeaknesses');
+  weakEl.innerHTML = winner.weaknesses.map(s=>`<li>${s}</li>`).join('');
+
+  const statsEl = document.getElementById('resultStats');
+  const stats = [
+    ['Раса', winner.race],
+    ['Принадлежность', winner.division],
+    ['Занпакутo', winner.zanpakuto],
+    ['Шикай', winner.shikai],
+    ['Банкай', winner.bankai],
+    ['Стиль боя', winner.combat]
+  ];
+  statsEl.innerHTML = stats.map(([k,v])=>`<li><span>${k}</span><span>${v}</span></li>`).join('');
+
+  // топ-3 родственных персонажа (исключая победителя)
+  const others = ranking.filter(c=>c.id!==winner.id).slice(0,4);
+  const maxScore = state.scores[winner.id] || 1;
+  const alsoEl = document.getElementById('alsoMatched');
+  alsoEl.innerHTML = others.map(c=>{
+    const rel = Math.max(8, Math.round((state.scores[c.id]/maxScore)*100));
+    return `<div class="also-row">
+      <img src="${c.img}" alt="${c.name}">
+      <span style="width:120px; flex:none; color:#c6c6c6;">${c.name}</span>
+      <span class="bar"><i style="width:${rel}%"></i></span>
+      <span class="pct">${rel}%</span>
+    </div>`;
+  }).join('');
+
+  // анимация появления процента и полосы совместимости
+  const fill = document.getElementById('matchFill');
+  const label = document.getElementById('matchPctLabel');
+  fill.style.width = '0%';
+  label.textContent = '0%';
+  requestAnimationFrame(()=>{
+    setTimeout(()=>{
+      fill.style.width = pct + '%';
+      animateNumber(label, 0, pct, 1400);
+    }, 200);
+  });
+}
+
+const TAG_RU = {
+  leadership:"лидерство", honor:"честь", justice:"справедливость", sacrifice:"жертвенность",
+  friendship:"дружба", loyalty:"верность", fear:"смелость перед страхом", strength:"внутренняя сила",
+  calm:"спокойствие", aggression:"боевой дух", responsibility:"ответственность", logic:"логика",
+  emotion:"эмоциональная открытость", intuition:"интуиция", creativity:"изобретательность",
+  confidence:"уверенность", freedom:"стремление к свободе", duty:"чувство долга", revenge:"жажда возмездия",
+  forgiveness:"способность прощать", hope:"надежда", darkness:"принятие своей тьмы", trust:"доверие",
+  risk:"готовность рисковать", discipline:"дисциплина"
+};
+
+function animateNumber(el, from, to, duration){
+  const start = performance.now();
+  function step(now){
+    const p = Math.min(1, (now-start)/duration);
+    const eased = 1 - Math.pow(1-p, 3);
+    const val = Math.round(from + (to-from)*eased);
+    el.textContent = val + '%';
+    if(p<1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+/* ----------------------------------------------------------------
+   11. ДЕЙСТВИЯ НА ЭКРАНЕ РЕЗУЛЬТАТА
+------------------------------------------------------------------- */
+document.getElementById('retakeBtn').addEventListener('click', ()=>{
+  showView('view-home');
+  renderLastResult();
+});
+
+document.getElementById('shareBtn').addEventListener('click', ()=>{
+  const name = document.getElementById('resultName').textContent;
+  const pct = document.getElementById('matchPctLabel').textContent;
+  const text = `Я прошёл(-a) BLEACH PERSONALITY TEST и моя духовная сила резонирует с ${name} — совпадение ${pct}! А кто твой персонаж?`;
+  const toast = document.getElementById('toast');
+
+  function showToast(msg){
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(()=> toast.classList.remove('show'), 2600);
+  }
+
+  if(navigator.share){
+    navigator.share({title:'BLEACH PERSONALITY TEST', text:text}).catch(()=>{});
+  } else if(navigator.clipboard){
+    navigator.clipboard.writeText(text).then(()=>{
+      showToast('Результат скопирован в буфер обмена ✧');
+    }).catch(()=>{
+      showToast(text);
+    });
+  } else {
+    showToast(text);
+  }
+});
+
+})();
+</script>
+</body>
+</html>
